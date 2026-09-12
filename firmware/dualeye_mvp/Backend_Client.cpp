@@ -27,7 +27,7 @@ bool Backend_SendConversation(const uint8_t *wav, size_t wavBytes, RobotBackendR
   http.addHeader("Content-Type", "audio/wav");
   http.addHeader("X-Session-Id", ROBOT_SESSION_ID);
   if (strlen(ROBOT_BACKEND_API_KEY)) http.addHeader("Authorization", String("Bearer ") + ROBOT_BACKEND_API_KEY);
-  const int status = http.POST(wav, wavBytes);
+  const int status = http.POST(const_cast<uint8_t *>(wav), wavBytes);
   if (status != HTTP_CODE_OK) {
     Serial.printf("[network] Backend HTTP %d\n", status);
     http.end();
@@ -68,4 +68,3 @@ bool Backend_ConnectWifi() { Serial.println("[network] Disabled in Robot_Config.
 bool Backend_SendConversation(const uint8_t *, size_t, RobotBackendResponse &result) { memset(&result, 0, sizeof(result)); return false; }
 void Backend_FreeResponse(RobotBackendResponse &result) { if (result.audio) free(result.audio); memset(&result, 0, sizeof(result)); }
 #endif
-
