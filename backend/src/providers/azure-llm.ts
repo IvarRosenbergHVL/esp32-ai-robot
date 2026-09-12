@@ -1,5 +1,5 @@
 import type { Config } from "../config.js";
-import { actionTypes, emotions, robotReplySchema, type LlmProvider, type RobotReply } from "../domain.js";
+import { actionTypes, emotions, robotReplySchema, type ConversationTurn, type LlmProvider, type RobotReply } from "../domain.js";
 import { createHttpClient, describeHttpError } from "../http.js";
 
 const instructions = `Du er stemmen og personligheten til en liten, vennlig vikingrobot med to runde øyne. Svar kort og naturlig på norsk. Velg én kontrollert øyefølelse og høyst noen få øyehandlinger. Handlingstidene er millisekunder fra starten av lydavspillingen. Ikke lag andre følelser eller handlinger enn de skjemaet tillater.`;
@@ -19,14 +19,20 @@ export class AzureLlmProvider implements LlmProvider {
     this.http = createHttpClient(config.REQUEST_TIMEOUT_MS);
   }
 
-  async reply(transcript: string): Promise<RobotReply> {
+  async reply(transcript: string, history: ConversationTurn[] = []): Promise<RobotReply> {
     const endpoint = this.config.AZURE_OPENAI_ENDPOINT.replace(/\/$/, "");
     const url = `${endpoint}/openai/responses?api-version=${encodeURIComponent(this.config.AZURE_OPENAI_API_VERSION)}`;
     try {
       const response = await this.http.post(url, {
         model: this.config.AZURE_OPENAI_DEPLOYMENT,
         instructions,
-        input: transcript,
+        input: [
+          ...history.flatMap(turn => [
+            { role: "user", content: turn.user },
+            { role: "assistant", content: turn.assistant }
+          ]),
+          { role: "user", content: transcript }
+        ],
         max_output_tokens: 500,
         text: {
           format: {
