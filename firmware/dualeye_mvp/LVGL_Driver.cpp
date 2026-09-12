@@ -7,6 +7,7 @@
 #include "LVGL_Driver.h"
 
 static lv_disp_draw_buf_t draw_buf,draw_buf2;
+static lv_indev_drv_t indev_drv, indev_drv2;
 lv_disp_t *disp;
 lv_disp_t *disp2;
 static lv_color_t buf1[ LVGL_BUF_LEN];
@@ -38,6 +39,24 @@ void example_lvgl_flush_cb( lv_disp_drv_t *drv, const lv_area_t *area, lv_color_
   esp_lcd_panel_draw_bitmap(panel_handle, offsetx1, offsety1, offsetx2 +1, offsety2 + 1, color_map);
   lv_disp_flush_ready(drv);
 }
+
+static void touch_read(esp_lcd_touch_handle_t handle, lv_indev_data_t *data)
+{
+  uint16_t x = 0, y = 0, strength = 0;
+  uint8_t count = 0;
+  esp_lcd_touch_read_data(handle);
+  const bool touched = esp_lcd_touch_get_coordinates(handle, &x, &y, &strength, &count, 1);
+  if (touched && count > 0) {
+    data->point.x = x;
+    data->point.y = y;
+    data->state = LV_INDEV_STATE_PR;
+  } else {
+    data->state = LV_INDEV_STATE_REL;
+  }
+}
+
+static void touch1_read_cb(lv_indev_drv_t *, lv_indev_data_t *data) { touch_read(tp, data); }
+static void touch2_read_cb(lv_indev_drv_t *, lv_indev_data_t *data) { touch_read(tp2, data); }
 /* Rotate display when LVGL driver parameters are updated. */
 void example_lvgl_port_update_callback(lv_disp_drv_t *drv)
 {
@@ -101,6 +120,18 @@ void Lvgl_Init(void)
   disp_drv2.full_refresh = 1;
   disp_drv2.user_data = panel_handle2;                
   disp2 = lv_disp_drv_register(&disp_drv2);  
+
+  lv_indev_drv_init(&indev_drv);
+  indev_drv.type = LV_INDEV_TYPE_POINTER;
+  indev_drv.disp = disp;
+  indev_drv.read_cb = touch1_read_cb;
+  lv_indev_drv_register(&indev_drv);
+
+  lv_indev_drv_init(&indev_drv2);
+  indev_drv2.type = LV_INDEV_TYPE_POINTER;
+  indev_drv2.disp = disp2;
+  indev_drv2.read_cb = touch2_read_cb;
+  lv_indev_drv_register(&indev_drv2);
 
   const esp_timer_create_args_t lvgl_tick_timer_args = {
     .callback = &example_increase_lvgl_tick,
