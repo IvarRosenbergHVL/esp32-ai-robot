@@ -10,3 +10,4 @@ dist/
 .env
 .env.*
 !.env.example
+Robot_Secrets.h
