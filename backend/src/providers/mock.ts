@@ -21,6 +21,6 @@ export class MockTtsProvider implements TtsProvider {
   constructor(private readonly config: Config) {}
   async synthesize(): Promise<TtsResult> {
     const audio = this.config.MOCK_TTS_FILE ? await readFile(this.config.MOCK_TTS_FILE) : Buffer.alloc(0);
-    return { audio, contentType: "audio/mpeg" };
+    return { audio, contentType: "audio/wav" };
   }
 }
