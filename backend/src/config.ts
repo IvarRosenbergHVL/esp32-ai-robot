@@ -7,6 +7,8 @@ const schema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   MAX_AUDIO_BYTES: z.coerce.number().int().positive().default(4_000_000),
   REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+  SESSION_TTL_MS: z.coerce.number().int().positive().default(30 * 60_000),
+  MAX_SESSIONS: z.coerce.number().int().positive().max(10_000).default(100),
   ROBOT_API_KEY: z.string().default(""),
   STT_PROVIDER: provider.default("mock"),
   LLM_PROVIDER: provider.default("mock"),
@@ -27,8 +29,10 @@ export type Config = z.infer<typeof schema>;
 export const config = schema.parse(process.env);
 
 export function assertProviderConfiguration(value: Config): void {
-  if ((value.STT_PROVIDER === "azure" || value.TTS_PROVIDER === "azure") && !value.AZURE_SPEECH_KEY) {
-    throw new Error("AZURE_SPEECH_KEY is required when an Azure Speech provider is enabled");
+  if (value.STT_PROVIDER === "azure" || value.TTS_PROVIDER === "azure") {
+    const missing = [["AZURE_SPEECH_KEY", value.AZURE_SPEECH_KEY], ["AZURE_SPEECH_REGION", value.AZURE_SPEECH_REGION]]
+      .filter(([, entry]) => !entry).map(([name]) => name);
+    if (missing.length) throw new Error(`Missing Azure Speech configuration: ${missing.join(", ")}`);
   }
   if (value.LLM_PROVIDER === "azure") {
     const missing = [
