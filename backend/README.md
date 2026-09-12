@@ -31,7 +31,8 @@ independently before enabling all three.
 `POST /api/v1/conversation` accepts a 16-bit PCM WAV recording (mono or stereo,
 8/16/24/48 kHz). The current Azure
 STT endpoint is intended for short utterances. The response includes transcript,
-reply, controlled eye cues, and an MP3 encoded as base64. Base64 keeps the first
+reply, controlled eye cues, and a 16 kHz/16-bit mono PCM WAV encoded as base64.
+This format can be sent directly to the ESP32 I²S playback layer. Base64 keeps the first
 firmware integration simple; a streaming or binary endpoint can replace it later.
 
 `GET /health` returns `{ "status": "ok" }`.
