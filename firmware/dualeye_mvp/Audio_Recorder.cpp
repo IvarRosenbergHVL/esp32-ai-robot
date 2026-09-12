@@ -59,7 +59,13 @@ bool Audio_Recorder_Update() {
   if (!recording) return false;
   int16_t stereo[320];
   const size_t samples = Audio_Hardware_ReadPcm(stereo, 320, 30) / sizeof(int16_t);
-  if (samples < 2) return true;
+  if (samples < 2) {
+    if (millis() - startedAt >= ROBOT_RECORD_MAX_MS) {
+      recording = false;
+      finalizeHeader();
+    }
+    return recording;
+  }
 
   double sum = 0;
   int16_t *mono = reinterpret_cast<int16_t *>(wavBuffer + kHeaderBytes + pcmBytes);
@@ -105,4 +111,3 @@ void Audio_Recorder_Discard() {
   pcmBytes = capacity = 0;
   recording = false;
 }
-
