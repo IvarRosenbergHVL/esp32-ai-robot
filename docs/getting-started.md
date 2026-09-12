@@ -2,12 +2,11 @@
 
 ## Requirements
 
-- Waveshare ESP32-S3-DualEye-Touch-LCD-1.28
+- Waveshare ESP32-S3-DualEye-LCD-1.28 (non-touch version)
 - USB-C data cable
 - Arduino IDE
 - Espressif Arduino core **3.2.0**
 - LVGL **8.3.10**
-- Waveshare's bundled `esp_lcd_touch` and `esp_lcd_touch_cst816s` libraries
 - Waveshare's bundled `OneButton` library
 - Waveshare's bundled `es7210` and `es8311` libraries (needed when onboard audio is enabled)
 
@@ -45,8 +44,8 @@ look in the same direction and blink together.
 
 The serial self-test also reports chip information, flash, PSRAM, nearby Wi-Fi
 network count, and microSD status. A short BOOT-button click centers the eyes in
-a temporary `notice` animation. Touch input is initialized for both displays and
-registered with LVGL for subsequent interaction work.
+a temporary `notice` animation. The selected board has no touch controllers;
+the firmware therefore registers no LVGL pointer devices.
 
 ## First-board acceptance test
 
@@ -55,13 +54,13 @@ registered with LVGL for subsequent interaction work.
 - Gaze direction matches on both physical eyes.
 - Blink closes and opens both eyes simultaneously.
 - Animation runs for at least ten minutes without a watchdog reset.
-- Serial output contains no initialization error.
+- Serial output contains no initialization error or attempts to initialize CST816S.
 
 Record mirrored or rotated behavior before changing pinout or rotation flags.
 
 ## Onboard audio bring-up
 
-Audio is disabled by default so display/touch problems remain isolated. After the
+Audio is disabled by default so display problems remain isolated. After the
 first display test succeeds:
 
 1. Install/copy Waveshare's bundled `es7210` and `es8311` libraries into the
