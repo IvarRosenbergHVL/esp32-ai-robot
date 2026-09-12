@@ -6,3 +6,11 @@
 void Lvgl_Example1(void);
 void LVGL_Backlight_adjustment(uint8_t Backlight);
 void Eye_Notice(void);
+
+enum class EyeEmotion : uint8_t {
+  Neutral, Attentive, Happy, Curious, Thinking, Surprised, Skeptical, Sleepy, Error
+};
+
+void Eye_SetEmotion(EyeEmotion emotion);
+bool Eye_SetEmotion(const char *emotion);
+bool Eye_PerformAction(const char *action);
