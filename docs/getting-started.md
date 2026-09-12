@@ -7,6 +7,8 @@
 - Arduino IDE
 - Espressif Arduino core **3.2.0**
 - LVGL **8.3.10**
+- Waveshare's bundled `esp_lcd_touch` and `esp_lcd_touch_cst816s` libraries
+- Waveshare's bundled `OneButton` library
 
 These versions match Waveshare's official example and should remain pinned until
 the first physical-board test is complete.
@@ -39,6 +41,11 @@ Expected output:
 
 Both displays should show cream-colored eyeballs with brown irises. They should
 look in the same direction and blink together.
+
+The serial self-test also reports chip information, flash, PSRAM, nearby Wi-Fi
+network count, and microSD status. A short BOOT-button click centers the eyes in
+a temporary `notice` animation. Touch input is initialized for both displays and
+registered with LVGL for subsequent interaction work.
 
 ## First-board acceptance test
 
