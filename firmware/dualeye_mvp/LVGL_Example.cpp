@@ -22,6 +22,9 @@ uint32_t next_blink_frame = 105;
 int16_t gaze_x = 0;
 int16_t gaze_y = 0;
 uint32_t notice_until_frame = 0;
+EyeEmotion current_emotion = EyeEmotion::Neutral;
+uint32_t forced_blink_until_frame = 0;
+uint8_t forced_blink_amount = 0;
 
 lv_obj_t *circle(lv_obj_t *parent, int16_t size, lv_color_t color) {
   lv_obj_t *obj = lv_obj_create(parent);
@@ -89,7 +92,14 @@ void animation_timer_cb(lv_timer_t *) {
     gaze_x = random(-26, 27);
     gaze_y = random(-17, 18);
   }
-  const uint8_t blink = blink_for_frame(frame_count);
+  if (current_emotion == EyeEmotion::Thinking && frame_count % 24 == 0) {
+    gaze_x = -gaze_x;
+    gaze_y = -10;
+  }
+  uint8_t blink = blink_for_frame(frame_count);
+  if (frame_count < forced_blink_until_frame) blink = forced_blink_amount;
+  if (current_emotion == EyeEmotion::Sleepy) blink = max(blink, static_cast<uint8_t>(55));
+  if (current_emotion == EyeEmotion::Skeptical) blink = max(blink, static_cast<uint8_t>(25));
   position_eye(left_eye, gaze_x, gaze_y, blink);
   position_eye(right_eye, gaze_x, gaze_y, blink);
 }
@@ -113,4 +123,53 @@ void Eye_Notice(void) {
   notice_until_frame = frame_count + 50;
   gaze_x = 0;
   gaze_y = 0;
+}
+
+void Eye_SetEmotion(EyeEmotion emotion) {
+  current_emotion = emotion;
+  notice_until_frame = frame_count + 25;
+  switch (emotion) {
+    case EyeEmotion::Attentive: gaze_x = 0; gaze_y = 0; break;
+    case EyeEmotion::Happy: gaze_x = 0; gaze_y = -5; break;
+    case EyeEmotion::Curious: gaze_x = 18; gaze_y = -8; break;
+    case EyeEmotion::Thinking: gaze_x = -20; gaze_y = -12; break;
+    case EyeEmotion::Surprised: gaze_x = 0; gaze_y = 0; forced_blink_amount = 0; break;
+    case EyeEmotion::Skeptical: gaze_x = 18; gaze_y = 3; break;
+    case EyeEmotion::Sleepy: gaze_x = 0; gaze_y = 12; break;
+    case EyeEmotion::Error: gaze_x = 0; gaze_y = 15; break;
+    default: gaze_x = gaze_y = 0; break;
+  }
+}
+
+bool Eye_SetEmotion(const char *emotion) {
+  if (!emotion) return false;
+  if (!strcmp(emotion, "neutral")) Eye_SetEmotion(EyeEmotion::Neutral);
+  else if (!strcmp(emotion, "attentive")) Eye_SetEmotion(EyeEmotion::Attentive);
+  else if (!strcmp(emotion, "happy")) Eye_SetEmotion(EyeEmotion::Happy);
+  else if (!strcmp(emotion, "curious")) Eye_SetEmotion(EyeEmotion::Curious);
+  else if (!strcmp(emotion, "thinking")) Eye_SetEmotion(EyeEmotion::Thinking);
+  else if (!strcmp(emotion, "surprised")) Eye_SetEmotion(EyeEmotion::Surprised);
+  else if (!strcmp(emotion, "skeptical")) Eye_SetEmotion(EyeEmotion::Skeptical);
+  else if (!strcmp(emotion, "sleepy")) Eye_SetEmotion(EyeEmotion::Sleepy);
+  else if (!strcmp(emotion, "error")) Eye_SetEmotion(EyeEmotion::Error);
+  else return false;
+  return true;
+}
+
+bool Eye_PerformAction(const char *action) {
+  if (!action) return false;
+  if (!strcmp(action, "blink")) { forced_blink_amount = 100; forced_blink_until_frame = frame_count + 3; }
+  else if (!strcmp(action, "double_blink")) { next_blink_frame = frame_count; }
+  else if (!strcmp(action, "look_left")) { gaze_x = -28; gaze_y = 0; notice_until_frame = frame_count + 25; }
+  else if (!strcmp(action, "look_right")) { gaze_x = 28; gaze_y = 0; notice_until_frame = frame_count + 25; }
+  else if (!strcmp(action, "look_up")) { gaze_x = 0; gaze_y = -20; notice_until_frame = frame_count + 25; }
+  else if (!strcmp(action, "look_down")) { gaze_x = 0; gaze_y = 20; notice_until_frame = frame_count + 25; }
+  else if (!strcmp(action, "look_center") || !strcmp(action, "reset")) Eye_Notice();
+  else if (!strcmp(action, "widen") || !strcmp(action, "startle")) Eye_SetEmotion(EyeEmotion::Surprised);
+  else if (!strcmp(action, "squint")) Eye_SetEmotion(EyeEmotion::Skeptical);
+  else if (!strcmp(action, "wink_left") || !strcmp(action, "wink_right")) {
+    // The first MVP renders synchronized lids; keep wink requests as a short blink.
+    forced_blink_amount = 100; forced_blink_until_frame = frame_count + 3;
+  } else return false;
+  return true;
 }
