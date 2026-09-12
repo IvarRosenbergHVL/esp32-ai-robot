@@ -9,6 +9,7 @@
 - LVGL **8.3.10**
 - Waveshare's bundled `esp_lcd_touch` and `esp_lcd_touch_cst816s` libraries
 - Waveshare's bundled `OneButton` library
+- Waveshare's bundled `es7210` and `es8311` libraries (needed when onboard audio is enabled)
 
 These versions match Waveshare's official example and should remain pinned until
 the first physical-board test is complete.
@@ -57,3 +58,23 @@ registered with LVGL for subsequent interaction work.
 - Serial output contains no initialization error.
 
 Record mirrored or rotated behavior before changing pinout or rotation flags.
+
+## Onboard audio bring-up
+
+Audio is disabled by default so display/touch problems remain isolated. After the
+first display test succeeds:
+
+1. Install/copy Waveshare's bundled `es7210` and `es8311` libraries into the
+   Arduino libraries directory.
+2. Set `ROBOT_ENABLE_ONBOARD_AUDIO` to `1` in `Robot_Config.h`.
+3. Compile and inspect Serial Monitor. A successful initialization reports
+   `ES7210 + ES8311` followed by RMS/peak input levels every 500 ms.
+4. Speak near the onboard microphones and verify that RMS/peak values change.
+5. Connect the intended speaker, start at low volume, set
+   `ROBOT_AUDIO_STARTUP_TONE` to `1`, and reboot once. A quiet 440 Hz tone should
+   play for 300 ms.
+6. Set the startup-tone flag back to `0` after validation.
+
+The amplifier is disabled after the test tone to reduce idle noise. PCM helpers
+use signed 16-bit stereo at 16 kHz and form the boundary for recording, ESP-SR,
+and later backend playback.
