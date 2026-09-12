@@ -28,7 +28,8 @@ independently before enabling all three.
 
 ## API
 
-`POST /api/v1/conversation` accepts a mono PCM WAV recording. The current Azure
+`POST /api/v1/conversation` accepts a 16-bit PCM WAV recording (mono or stereo,
+8/16/24/48 kHz). The current Azure
 STT endpoint is intended for short utterances. The response includes transcript,
 reply, controlled eye cues, and an MP3 encoded as base64. Base64 keeps the first
 firmware integration simple; a streaming or binary endpoint can replace it later.
@@ -38,9 +39,27 @@ firmware integration simple; a streaming or binary endpoint can replace it later
 If `ROBOT_API_KEY` is set, send it as a bearer token. Azure credentials must never
 be stored in firmware.
 
+Send a stable `x-session-id` (letters, digits, `_` and `-`, maximum 64 characters)
+to retain the latest six conversation turns for up to `SESSION_TTL_MS`. If it is
+omitted, the backend creates an ID and returns it as `sessionId`; send that value
+on the next request. MVP session state is kept in memory and resets on deployment.
+
+Every response carries `x-request-id`; errors also include it in JSON. `GET /ready`
+reports configured provider modes for deployment readiness checks without exposing
+credentials.
+
 ## Deploy
 
 Build with `docker build -t esp32-ai-robot-backend .` or deploy the `backend`
 directory to Azure Container Apps/App Service. Configure all production values
 from `.env.example` as platform environment variables or secret references.
 Expose port 3000 and configure HTTPS. Do not copy `.env` into the image.
+
+Before deploying, run:
+
+```bash
+npm ci
+npm test
+npm run typecheck
+npm run build
+```
