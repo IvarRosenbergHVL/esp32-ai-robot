@@ -21,6 +21,7 @@ uint32_t frame_count = 0;
 uint32_t next_blink_frame = 105;
 int16_t gaze_x = 0;
 int16_t gaze_y = 0;
+uint32_t notice_until_frame = 0;
 
 lv_obj_t *circle(lv_obj_t *parent, int16_t size, lv_color_t color) {
   lv_obj_t *obj = lv_obj_create(parent);
@@ -81,7 +82,10 @@ uint8_t blink_for_frame(uint32_t frame) {
 
 void animation_timer_cb(lv_timer_t *) {
   ++frame_count;
-  if (frame_count % 40 == 0) {
+  if (frame_count < notice_until_frame) {
+    gaze_x = 0;
+    gaze_y = 0;
+  } else if (frame_count % 40 == 0) {
     gaze_x = random(-26, 27);
     gaze_y = random(-17, 18);
   }
@@ -103,4 +107,10 @@ void Lvgl_Example1(void) {
 
 void LVGL_Backlight_adjustment(uint8_t backlight) {
   Set_Backlight(backlight);
+}
+
+void Eye_Notice(void) {
+  notice_until_frame = frame_count + 50;
+  gaze_x = 0;
+  gaze_y = 0;
 }
