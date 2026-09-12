@@ -5,6 +5,7 @@
 #include "Board_Diagnostics.h"
 #include "SD_Card.h"
 #include "I2C_Driver.h"
+#include "Audio_Hardware.h"
 
 void setup()
 {
@@ -14,6 +15,7 @@ void setup()
   Board_Diagnostics_Run();
   SD_Init();
   I2C_Init();
+  Audio_Hardware_Init();
   LCD_INIT();
   Lvgl_Init();
   Button_Init();
@@ -25,6 +27,7 @@ void setup()
 }
 
 void loop() {
+  Audio_Hardware_Update();
   if (BOOT_KEY_State == Click) {
     BOOT_KEY_State = None;
     Eye_Notice();
