@@ -24,11 +24,11 @@ export class AzureTtsProvider implements TtsProvider {
         headers: {
           "Ocp-Apim-Subscription-Key": this.config.AZURE_SPEECH_KEY,
           "Content-Type": "application/ssml+xml",
-          "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3",
+          "X-Microsoft-OutputFormat": "riff-16khz-16bit-mono-pcm",
           "User-Agent": "esp32-ai-robot"
         }
       });
-      return { audio: Buffer.from(response.data), contentType: "audio/mpeg" };
+      return { audio: Buffer.from(response.data), contentType: "audio/wav" };
     } catch (error) {
       throw describeHttpError(error, "Azure Speech TTS");
     }
