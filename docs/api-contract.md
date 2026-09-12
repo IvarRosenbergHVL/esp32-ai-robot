@@ -36,7 +36,7 @@ The body is a short mono PCM WAV recording, preferably 16 kHz and 16-bit.
   "emotion": "happy",
   "actions": [{ "type": "blink", "atMs": 700 }],
   "audio": {
-    "contentType": "audio/mpeg",
+    "contentType": "audio/wav",
     "encoding": "base64",
     "data": "..."
   },
@@ -44,6 +44,9 @@ The body is a short mono PCM WAV recording, preferably 16 kHz and 16-bit.
   "input": { "sampleRate": 16000, "channels": 1, "bitsPerSample": 16 }
 }
 ```
+
+Azure TTS is requested as RIFF 16 kHz/16-bit mono PCM so the ESP32 can play it
+without an MP3 decoder.
 
 Reuse `sessionId` through the `X-Session-Id` request header for short-term context.
 The MVP keeps the latest six turns in memory for 30 minutes by default. Audio is
