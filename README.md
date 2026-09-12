@@ -1,5 +1,11 @@
 # ESP32 AI robot
 
+The MVP feature branch contains the interaction skeleton: proximity wake-up,
+WakeNet adapter boundary, silence-terminated PSRAM recording, Azure conversation
+backend, PCM-WAV playback, controlled eye cues, local SD greeting, and a central
+robot state machine. Hardware features stay off by default until the non-touch
+board is validated subsystem by subsystem.
+
 Firmware for an AI voice robot based on the
 [Waveshare ESP32-S3-DualEye-LCD-1.28](https://www.waveshare.com/wiki/ESP32-S3-DualEye-LCD-1.28),
 the version without touch controllers.
