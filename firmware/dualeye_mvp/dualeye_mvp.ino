@@ -6,6 +6,7 @@
 #include "SD_Card.h"
 #include "I2C_Driver.h"
 #include "Audio_Hardware.h"
+#include "Robot_Controller.h"
 
 void setup()
 {
@@ -23,15 +24,18 @@ void setup()
 
   vTaskDelay(pdMS_TO_TICKS(100));
   LVGL_Start();
+  Robot_Controller_Init();
   Serial.println("[robot] Both displays initialized; eye animation running");
 }
 
 void loop() {
-  Audio_Hardware_Update();
+  if (Robot_Controller_State() != RobotState::Recording) Audio_Hardware_Update();
+  Robot_Controller_Update();
   if (BOOT_KEY_State == Click) {
     BOOT_KEY_State = None;
     Eye_Notice();
-    Serial.println("[robot] BOOT click: notice animation");
+    Robot_Controller_TriggerWakeWord();
+    Serial.println("[robot] BOOT click: simulating wake word");
   }
   vTaskDelay(pdMS_TO_TICKS(5));
 }
