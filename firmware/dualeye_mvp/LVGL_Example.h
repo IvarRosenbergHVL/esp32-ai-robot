@@ -5,3 +5,4 @@
 
 void Lvgl_Example1(void);
 void LVGL_Backlight_adjustment(uint8_t Backlight);
+void Eye_Notice(void);
