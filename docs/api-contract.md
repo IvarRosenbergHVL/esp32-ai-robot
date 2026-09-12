@@ -20,6 +20,7 @@ only contain the robot API address/device credential and never Azure secrets.
 POST /api/v1/conversation
 Content-Type: audio/wav
 Authorization: Bearer <optional robot API key>
+X-Session-Id: robot-1
 ```
 
 The body is a short mono PCM WAV recording, preferably 16 kHz and 16-bit.
@@ -28,6 +29,8 @@ The body is a short mono PCM WAV recording, preferably 16 kHz and 16-bit.
 
 ```json
 {
+  "requestId": "e728...",
+  "sessionId": "robot-1",
   "transcript": "Hei, hvem er du?",
   "reply": "Jeg er MIME, en liten vikingrobot.",
   "emotion": "happy",
@@ -37,6 +40,11 @@ The body is a short mono PCM WAV recording, preferably 16 kHz and 16-bit.
     "encoding": "base64",
     "data": "..."
   },
-  "processingMs": 1234
+  "processingMs": 1234,
+  "input": { "sampleRate": 16000, "channels": 1, "bitsPerSample": 16 }
 }
 ```
+
+Reuse `sessionId` through the `X-Session-Id` request header for short-term context.
+The MVP keeps the latest six turns in memory for 30 minutes by default. Audio is
+validated before any billable Azure request is made.
