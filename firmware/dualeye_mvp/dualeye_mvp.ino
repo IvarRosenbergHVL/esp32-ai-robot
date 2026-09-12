@@ -4,6 +4,7 @@
 #include "Button_Driver.h"
 #include "Board_Diagnostics.h"
 #include "SD_Card.h"
+#include "I2C_Driver.h"
 
 void setup()
 {
