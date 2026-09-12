@@ -33,7 +33,7 @@ const providers: Providers = {
     emotion: "happy",
     actions: [{ type: "blink", atMs: 100 }]
   }) },
-  tts: { synthesize: async () => ({ audio: Buffer.from([1, 2, 3]), contentType: "audio/mpeg" }) }
+  tts: { synthesize: async () => ({ audio: Buffer.from([1, 2, 3]), contentType: "audio/wav" }) }
 };
 
 async function withServer(run: (baseUrl: string) => Promise<void>) {
@@ -54,6 +54,7 @@ test("runs the conversation pipeline and retains bounded session context", async
     const firstBody = await first.json() as any;
     assert.equal(firstBody.reply, "Hei på deg");
     assert.equal(firstBody.audio.data, "AQID");
+    assert.equal(firstBody.audio.contentType, "audio/wav");
     assert.equal(firstBody.input.sampleRate, 16000);
 
     const second = await fetch(`${baseUrl}/api/v1/conversation`, { method: "POST", headers, body: body(wav()) });
