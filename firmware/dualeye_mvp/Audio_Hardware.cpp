@@ -126,6 +126,48 @@ void Audio_Hardware_PlayTestTone(uint16_t frequencyHz, uint16_t durationMs) {
   Serial.println("[audio] Test tone complete");
 }
 
+bool Audio_Hardware_PlayWav(const uint8_t *wav, size_t bytes) {
+  if (!status.initialized || !wav || bytes < 44 || memcmp(wav, "RIFF", 4) || memcmp(wav + 8, "WAVE", 4)) return false;
+  uint16_t channels = 0, bits = 0;
+  uint32_t sampleRate = 0;
+  const uint8_t *pcm = nullptr;
+  size_t pcmBytes = 0;
+  size_t offset = 12;
+  while (offset + 8 <= bytes) {
+    const uint32_t chunkBytes = static_cast<uint32_t>(wav[offset + 4]) |
+      (static_cast<uint32_t>(wav[offset + 5]) << 8) | (static_cast<uint32_t>(wav[offset + 6]) << 16) |
+      (static_cast<uint32_t>(wav[offset + 7]) << 24);
+    if (offset + 8 + chunkBytes > bytes) return false;
+    if (!memcmp(wav + offset, "fmt ", 4) && chunkBytes >= 16) {
+      channels = wav[offset + 10] | (wav[offset + 11] << 8);
+      sampleRate = static_cast<uint32_t>(wav[offset + 12]) | (static_cast<uint32_t>(wav[offset + 13]) << 8) |
+        (static_cast<uint32_t>(wav[offset + 14]) << 16) | (static_cast<uint32_t>(wav[offset + 15]) << 24);
+      bits = wav[offset + 22] | (wav[offset + 23] << 8);
+    } else if (!memcmp(wav + offset, "data", 4)) {
+      pcm = wav + offset + 8;
+      pcmBytes = chunkBytes;
+    }
+    offset += 8 + chunkBytes + (chunkBytes & 1);
+  }
+  if (!pcm || bits != 16 || sampleRate != ROBOT_AUDIO_SAMPLE_RATE || (channels != 1 && channels != 2)) return false;
+  const int16_t *input = reinterpret_cast<const int16_t *>(pcm);
+  const size_t inputSamples = pcmBytes / sizeof(int16_t);
+  int16_t stereo[320];
+  Audio_Hardware_SetSpeakerEnabled(true);
+  if (channels == 2) {
+    for (size_t first = 0; first < inputSamples; first += 320)
+      Audio_Hardware_WritePcm(input + first, min(static_cast<size_t>(320), inputSamples - first));
+  } else {
+    for (size_t first = 0; first < inputSamples; first += 160) {
+      const size_t count = min(static_cast<size_t>(160), inputSamples - first);
+      for (size_t index = 0; index < count; ++index) stereo[index * 2] = stereo[index * 2 + 1] = input[first + index];
+      Audio_Hardware_WritePcm(stereo, count * 2);
+    }
+  }
+  Audio_Hardware_SetSpeakerEnabled(false);
+  return true;
+}
+
 void Audio_Hardware_Update() {
   if (!status.initialized) return;
   int16_t samples[320];
@@ -166,6 +208,6 @@ size_t Audio_Hardware_ReadPcm(int16_t *, size_t, uint32_t) { return 0; }
 size_t Audio_Hardware_WritePcm(const int16_t *, size_t) { return 0; }
 void Audio_Hardware_SetSpeakerEnabled(bool) {}
 void Audio_Hardware_PlayTestTone(uint16_t, uint16_t) {}
+bool Audio_Hardware_PlayWav(const uint8_t *, size_t) { return false; }
 
 #endif
-
