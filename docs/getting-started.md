@@ -77,3 +77,22 @@ first display test succeeds:
 The amplifier is disabled after the test tone to reduce idle noise. PCM helpers
 use signed 16-bit stereo at 16 kHz and form the boundary for recording, ESP-SR,
 and later backend playback.
+## Robot interaction foundation
+
+The firmware has a central controller with this primary flow:
+
+`Idle → WakeListening → Recording → Thinking → Speaking → Idle`
+
+During development, the BOOT button simulates a detected wake word. Hardware
+features are independently enabled in `Robot_Config.h`. Copy
+`Robot_Secrets.example.h` to the ignored `Robot_Secrets.h` before enabling
+networking. Networking requires ArduinoJson; proximity requires the Pololu
+VL53L1X Arduino library.
+
+Place `/hei-du.wav` on the SD card for the local very-close greeting. It must be
+16 kHz, 16-bit mono PCM WAV. It plays once per approach, observes a 75-second
+cooldown, and rearms only after the person leaves the reset distance.
+
+Recording uses PSRAM, converts stereo microphone input to mono WAV, and stops
+after sustained silence or ten seconds. Azure TTS returns the same PCM format
+for direct I2S playback.
