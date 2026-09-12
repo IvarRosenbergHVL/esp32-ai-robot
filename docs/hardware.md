@@ -30,6 +30,17 @@ These values follow the official Waveshare Arduino example.
 | LCD 2 reset | 8 |
 | LCD 1 backlight | 46 |
 | LCD 2 backlight | 39 |
+| Touch 1 reset | 4 |
+| Touch 1 interrupt | 5 |
+| Touch 2 reset | 6 |
+| Touch 2 interrupt | 7 |
+| I2C bus 1 SDA / SCL | 11 / 10 |
+| I2C bus 2 SDA / SCL | 3 / 2 |
+| Audio MCLK / BCLK / LRCLK | 12 / 13 / 14 |
+| Audio data in / out | 15 / 16 |
+| Audio amplifier enable | 9 |
+| microSD CLK / CMD / D0 | 17 / 21 / 18 |
+| BOOT button | 0 |
 
 Do not assign external peripherals to these GPIOs. Remaining pins will be
 allocated after checking the complete schematic and connector breakout.
