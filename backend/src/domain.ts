@@ -21,8 +21,9 @@ export const robotReplySchema = z.object({
 });
 
 export type RobotReply = z.infer<typeof robotReplySchema>;
+export interface ConversationTurn { user: string; assistant: string; }
 
 export interface SttProvider { transcribe(audio: Buffer, contentType: string): Promise<string>; }
-export interface LlmProvider { reply(transcript: string): Promise<RobotReply>; }
+export interface LlmProvider { reply(transcript: string, history?: ConversationTurn[]): Promise<RobotReply>; }
 export interface TtsResult { audio: Buffer; contentType: string; }
 export interface TtsProvider { synthesize(text: string): Promise<TtsResult>; }
