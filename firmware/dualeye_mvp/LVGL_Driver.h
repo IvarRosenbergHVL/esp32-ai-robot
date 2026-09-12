@@ -5,6 +5,7 @@
 #include <esp_heap_caps.h>
 #include "LCD_Driver.h"
 #include "Board_Configuration.h"
+#include "Touch_CST816.h"
 
 #define LVGL_BUF_LEN  (EXAMPLE_LCD_WIDTH * EXAMPLE_LCD_HEIGHT / 10)
 
