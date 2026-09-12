@@ -1,7 +1,8 @@
 # ESP32 AI robot
 
 Firmware for an AI voice robot based on the
-[Waveshare ESP32-S3-DualEye-Touch-LCD-1.28](https://docs.waveshare.com/ESP32-S3-DualEye-Touch-LCD-1.28).
+[Waveshare ESP32-S3-DualEye-LCD-1.28](https://www.waveshare.com/wiki/ESP32-S3-DualEye-LCD-1.28),
+the version without touch controllers.
 
 The first MVP brings up both 240 x 240 GC9A01 displays and renders synchronized
 animated eyes. The repository also contains a small backend for the Azure
@@ -39,5 +40,5 @@ stream should be sent to the API.
 
 Low-level display initialization and the GC9A01 driver originate from
 Waveshare's official
-[`ESP32-S3-DualEye-Touch-LCD-1.28`](https://github.com/waveshareteam/ESP32-S3-DualEye-Touch-LCD-1.28)
+[`ESP32-S3-DualEye-LCD-1.28`](https://github.com/waveshareteam/ESP32-S3-DualEye-Touch-LCD-1.28/tree/main/example/ESP32-S3-DualEye-LCD-1.28)
 examples.
