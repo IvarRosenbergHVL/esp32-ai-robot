@@ -4,8 +4,9 @@ Firmware for an AI voice robot based on the
 [Waveshare ESP32-S3-DualEye-Touch-LCD-1.28](https://docs.waveshare.com/ESP32-S3-DualEye-Touch-LCD-1.28).
 
 The first MVP brings up both 240 x 240 GC9A01 displays and renders synchronized
-animated eyes. Later increments add onboard audio, local wake-word detection,
-VL53L1X proximity sensing, and the backend STT/LLM/TTS loop.
+animated eyes. The repository also contains a small backend for the Azure
+STT/LLM/TTS loop. Later firmware increments add onboard audio, local wake-word
+detection, and VL53L1X proximity sensing.
 
 ## Current milestone: DualEye bring-up
 
@@ -18,15 +19,17 @@ Arduino 3.2.0 display example. It provides:
 - serial startup diagnostics at 115200 baud.
 
 See [docs/getting-started.md](docs/getting-started.md) for build and upload
-instructions and [docs/hardware.md](docs/hardware.md) for the hardware inventory.
+instructions, [docs/hardware.md](docs/hardware.md) for the hardware inventory,
+and [backend/README.md](backend/README.md) for the conversation service.
 
 ## Planned interaction flow
 
 1. VL53L1X detects a person inside a configurable distance (initially 100 cm).
 2. The robot enters an attentive state and enables local keyword spotting.
 3. A wake word starts utterance recording.
-4. Audio is sent over Wi-Fi to the future robot API.
-5. The API uses NB-Whisper for STT, an LLM for the response, and Chatterbox for TTS.
+4. Audio is sent over Wi-Fi to the robot API.
+5. The MVP API uses Azure Speech for STT/TTS and Azure OpenAI for the response.
+   Provider interfaces allow later use of NB-Whisper and Chatterbox.
 6. The robot plays returned audio while executing eye/animation cues.
 
 The display MVP runs without a backend. No continuous microphone or camera
