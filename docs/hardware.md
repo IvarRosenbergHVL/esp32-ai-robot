@@ -4,7 +4,7 @@
 
 | Component | Model | Initial role |
 |---|---|---|
-| Main controller/display | Waveshare ESP32-S3-DualEye-Touch-LCD-1.28 | Main controller and eyes |
+| Main controller/display | Waveshare ESP32-S3-DualEye-LCD-1.28 (non-touch) | Main controller and eyes |
 | Proximity sensor | VL53L1X ToF, up to 400 cm | Presence gate; initial threshold 100 cm |
 | Microphone module | GY-MAX4466, analog ADC | External microphone experiments |
 | Speaker | 40 mm, 8 ohm, 2-3 W | Speech output |
@@ -30,10 +30,6 @@ These values follow the official Waveshare Arduino example.
 | LCD 2 reset | 8 |
 | LCD 1 backlight | 46 |
 | LCD 2 backlight | 39 |
-| Touch 1 reset | 4 |
-| Touch 1 interrupt | 5 |
-| Touch 2 reset | 6 |
-| Touch 2 interrupt | 7 |
 | I2C bus 1 SDA / SCL | 11 / 10 |
 | I2C bus 2 SDA / SCL | 3 / 2 |
 | Audio MCLK / BCLK / LRCLK | 12 / 13 / 14 |
