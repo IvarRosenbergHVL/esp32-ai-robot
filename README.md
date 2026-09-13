@@ -2,7 +2,7 @@
 
 The MVP feature branch contains the interaction skeleton: proximity wake-up,
 WakeNet adapter boundary, silence-terminated PSRAM recording, Azure conversation
-backend, PCM-WAV playback, controlled eye cues, local SD greeting, and a central
+backend, PCM-WAV playback, controlled eye cues, local SD proximity cue, and a central
 robot state machine. Hardware features stay off by default until the non-touch
 board is validated subsystem by subsystem.
 
