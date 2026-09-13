@@ -89,8 +89,8 @@ features are independently enabled in `Robot_Config.h`. Copy
 networking. Networking requires ArduinoJson; proximity requires the Pololu
 VL53L1X Arduino library.
 
-Place `/hei-du.wav` on the SD card for the local very-close greeting. It must be
-16 kHz, 16-bit mono PCM WAV. It plays once per approach, observes a 75-second
+Place `/marseillaise.wav` on the SD card for the local very-close proximity cue.
+It must be 16 kHz, 16-bit mono PCM WAV. It plays once per approach, observes a 75-second
 cooldown, and rearms only after the person leaves the reset distance.
 
 Recording uses PSRAM, converts stereo microphone input to mono WAV, and stops
