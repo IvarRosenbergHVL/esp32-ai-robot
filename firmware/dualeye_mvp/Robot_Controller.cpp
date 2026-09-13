@@ -12,12 +12,12 @@ namespace {
 RobotState state = RobotState::Booting;
 bool personPresent = false;
 bool wakeRequested = false;
-bool greetedThisApproach = false;
-uint32_t lastGreetingAt = 0;
+bool playedCueThisApproach = false;
+uint32_t lastCueAt = 0;
 uint32_t stateEnteredAt = 0;
 
-bool playLocalGreeting() {
-  File file = SD_MMC.open("/hei-du.wav", FILE_READ);
+bool playLocalProximityCue() {
+  File file = SD_MMC.open("/marseillaise.wav", FILE_READ);
   if (!file || file.isDirectory() || file.size() < 44) {
     if (file) file.close();
     return false;
@@ -96,22 +96,22 @@ void Robot_Controller_Update() {
   if (proximity.valid) {
     if (!personPresent && proximity.millimeters <= ROBOT_PROXIMITY_WAKE_MM) {
       personPresent = true;
-      greetedThisApproach = false;
+      playedCueThisApproach = false;
       if (state == RobotState::Idle) enter(RobotState::WakeListening);
     } else if (personPresent && proximity.millimeters >= ROBOT_PROXIMITY_RESET_MM) {
       personPresent = false;
-      greetedThisApproach = false;
+      playedCueThisApproach = false;
       if (state == RobotState::WakeListening) enter(RobotState::Idle);
     }
     if (personPresent && proximity.millimeters <= ROBOT_PROXIMITY_TOO_CLOSE_MM && state == RobotState::WakeListening)
       Eye_SetEmotion(EyeEmotion::Surprised);
-    if (personPresent && !greetedThisApproach && proximity.millimeters <= ROBOT_PROXIMITY_GREETING_MM &&
+    if (personPresent && !playedCueThisApproach && proximity.millimeters <= ROBOT_PROXIMITY_CUE_MM &&
         state == RobotState::WakeListening &&
-        (!lastGreetingAt || millis() - lastGreetingAt >= ROBOT_GREETING_COOLDOWN_MS)) {
-      lastGreetingAt = millis();
-      greetedThisApproach = true;
+        (!lastCueAt || millis() - lastCueAt >= ROBOT_PROXIMITY_CUE_COOLDOWN_MS)) {
+      lastCueAt = millis();
+      playedCueThisApproach = true;
       Eye_Notice();
-      if (!playLocalGreeting()) Serial.println("[robot] Put a 16 kHz/16-bit mono PCM /hei-du.wav on SD for local greeting");
+      if (!playLocalProximityCue()) Serial.println("[robot] Put a 16 kHz/16-bit mono PCM /marseillaise.wav on SD for the proximity cue");
     }
   }
 
