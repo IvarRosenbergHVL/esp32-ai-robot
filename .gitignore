@@ -1,0 +1,13 @@
+.DS_Store
+*.bin
+*.elf
+*.map
+build/
+.pio/
+.vscode/
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+Robot_Secrets.h
