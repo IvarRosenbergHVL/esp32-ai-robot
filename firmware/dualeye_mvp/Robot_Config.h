@@ -12,7 +12,7 @@
 #define ROBOT_AUDIO_STARTUP_TONE 0
 
 // Plays the bundled 16 kHz, signed 16-bit mono PCM WAV once during startup.
-#define ROBOT_AUDIO_BOOT_WAV 1
+#define ROBOT_AUDIO_BOOT_WAV 0
 
 #define ROBOT_AUDIO_SAMPLE_RATE 16000
 #define ROBOT_AUDIO_CODEC_VOLUME 75

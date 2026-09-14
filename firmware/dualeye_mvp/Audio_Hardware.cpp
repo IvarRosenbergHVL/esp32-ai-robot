@@ -101,13 +101,20 @@ size_t Audio_Hardware_WritePcm(const int16_t *samples, size_t sampleCount) {
   const uint8_t *data = reinterpret_cast<const uint8_t *>(samples);
   const size_t bytes = sampleCount * sizeof(int16_t);
   size_t written = 0;
+  uint32_t lastProgressAt = millis();
   while (written < bytes) {
     const size_t count = audioI2s.write(data + written, bytes - written);
     if (!count) {
+      if (millis() - lastProgressAt >= 1000) {
+        Serial.printf("[audio] I2S write stalled after %u/%u bytes\n",
+                      static_cast<unsigned>(written), static_cast<unsigned>(bytes));
+        break;
+      }
       vTaskDelay(pdMS_TO_TICKS(1));
       continue;
     }
     written += count;
+    lastProgressAt = millis();
   }
   return written;
 }
