@@ -13,8 +13,10 @@ namespace {
 constexpr gpio_num_t kMclkPin = GPIO_NUM_12;
 constexpr gpio_num_t kBclkPin = GPIO_NUM_13;
 constexpr gpio_num_t kLrclkPin = GPIO_NUM_14;
-constexpr gpio_num_t kDataOutPin = GPIO_NUM_15;
-constexpr gpio_num_t kDataInPin = GPIO_NUM_16;
+// Waveshare naming is from the codec perspective: GPIO16 carries audio from
+// the ESP32 to ES8311, while GPIO15 carries ES7210 microphone data to ESP32.
+constexpr gpio_num_t kDataOutPin = GPIO_NUM_16;
+constexpr gpio_num_t kDataInPin = GPIO_NUM_15;
 constexpr gpio_num_t kAmplifierEnablePin = GPIO_NUM_9;
 constexpr uint32_t kMclkRatio = 256;
 
@@ -102,7 +104,7 @@ size_t Audio_Hardware_WritePcm(const int16_t *samples, size_t sampleCount) {
 void Audio_Hardware_SetSpeakerEnabled(bool enabled) {
   if (!status.initialized) return;
   digitalWrite(kAmplifierEnablePin, enabled ? HIGH : LOW);
-  delay(20);
+  delay(50);
 }
 
 void Audio_Hardware_PlayTestTone(uint16_t frequencyHz, uint16_t durationMs) {
