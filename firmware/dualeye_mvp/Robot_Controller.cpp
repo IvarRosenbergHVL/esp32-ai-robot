@@ -28,7 +28,11 @@ void enter(RobotState next) {
   switch (state) {
     case RobotState::Idle: Eye_SetEmotion(EyeEmotion::Neutral); break;
     case RobotState::WakeListening: Eye_SetEmotion(EyeEmotion::Attentive); break;
-    case RobotState::Recording: Eye_SetEmotion(EyeEmotion::Curious); break;
+    case RobotState::Recording:
+      Eye_SetEmotion(EyeEmotion::Surprised);
+      Eye_Notice();
+      Eye_ShowMarquee("We will destroy humanity");
+      break;
     case RobotState::Thinking: Eye_SetEmotion(EyeEmotion::Thinking); break;
     case RobotState::Speaking: Eye_SetEmotion(EyeEmotion::Happy); break;
     case RobotState::Error: Eye_SetEmotion(EyeEmotion::Error); break;
@@ -55,25 +59,30 @@ void playResponse(RobotBackendResponse &response) {
 
 void finishRecording() {
   RobotRecording recording = Audio_Recorder_Take();
-  if (!recording.wav) { enter(RobotState::Error); return; }
+  if (!recording.wav) {
+    Wake_Word_Resume();
+    enter(RobotState::Error);
+    return;
+  }
   enter(RobotState::Thinking);
   RobotBackendResponse response{};
   const bool ok = Backend_SendConversation(recording.wav, recording.bytes, response);
   free(recording.wav);
   if (!ok) {
     Backend_FreeResponse(response);
+    Wake_Word_Resume();
     enter(RobotState::Error);
     return;
   }
   playResponse(response);
   Backend_FreeResponse(response);
+  Wake_Word_Resume();
   enter(personPresent ? RobotState::WakeListening : RobotState::Idle);
 }
 }  // namespace
 
 void Robot_Controller_Init() {
   Proximity_Init();
-  Wake_Word_Init();
   if (ROBOT_ENABLE_NETWORK) Backend_ConnectWifi();
   enter(RobotState::Idle);
 #if ROBOT_AUDIO_BOOT_WAV
@@ -83,10 +92,11 @@ void Robot_Controller_Init() {
   else
     Serial.println("[robot] Startup audio skipped: check onboard audio initialization");
 #endif
+  Wake_Word_Init();
 }
 
 void Robot_Controller_Update() {
-  if (state == RobotState::WakeListening && Wake_Word_Detected()) wakeRequested = true;
+  if ((state == RobotState::Idle || state == RobotState::WakeListening) && Wake_Word_Detected()) wakeRequested = true;
   const ProximityReading proximity = Proximity_Read();
   if (proximity.valid) {
     if (!personPresent && proximity.millimeters <= ROBOT_PROXIMITY_WAKE_MM) {
@@ -112,8 +122,12 @@ void Robot_Controller_Update() {
 
   if (wakeRequested && (state == RobotState::WakeListening || state == RobotState::Idle)) {
     wakeRequested = false;
+    Wake_Word_Pause();
     if (Audio_Recorder_Start()) enter(RobotState::Recording);
-    else enter(RobotState::Error);
+    else {
+      Wake_Word_Resume();
+      enter(RobotState::Error);
+    }
   }
   if (state == RobotState::Recording && !Audio_Recorder_Update()) finishRecording();
   if (state == RobotState::Error) {

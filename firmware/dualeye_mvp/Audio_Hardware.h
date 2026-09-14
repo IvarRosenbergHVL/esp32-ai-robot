@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+class I2SClass;
+
 struct RobotAudioStatus {
   bool enabled;
   bool initialized;
@@ -23,3 +25,4 @@ size_t Audio_Hardware_WritePcm(const int16_t *samples, size_t sampleCount);
 void Audio_Hardware_SetSpeakerEnabled(bool enabled);
 void Audio_Hardware_PlayTestTone(uint16_t frequencyHz = 440, uint16_t durationMs = 300);
 bool Audio_Hardware_PlayWav(const uint8_t *wav, size_t bytes);
+I2SClass *Audio_Hardware_I2S();

@@ -5,11 +5,11 @@
 #define ROBOT_ENABLE_ONBOARD_AUDIO 1
 #define ROBOT_ENABLE_NETWORK 0
 #define ROBOT_ENABLE_PROXIMITY 0
-#define ROBOT_ENABLE_WAKE_WORD 0
+#define ROBOT_ENABLE_WAKE_WORD 1
 
 // Plays a quiet 440 Hz tone for 300 ms after successful audio initialization.
 // Enable only after a speaker is connected and begin with low volume.
-#define ROBOT_AUDIO_STARTUP_TONE 1
+#define ROBOT_AUDIO_STARTUP_TONE 0
 
 // Plays the bundled 16 kHz, signed 16-bit mono PCM WAV once during startup.
 #define ROBOT_AUDIO_BOOT_WAV 1

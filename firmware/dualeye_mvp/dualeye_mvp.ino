@@ -6,6 +6,7 @@
 #include "SD_Card.h"
 #include "I2C_Driver.h"
 #include "Audio_Hardware.h"
+#include "Robot_Config.h"
 #include "Robot_Controller.h"
 
 void setup()
@@ -29,7 +30,9 @@ void setup()
 }
 
 void loop() {
+#if !ROBOT_ENABLE_WAKE_WORD
   if (Robot_Controller_State() != RobotState::Recording) Audio_Hardware_Update();
+#endif
   Robot_Controller_Update();
   if (BOOT_KEY_State == Click) {
     BOOT_KEY_State = None;

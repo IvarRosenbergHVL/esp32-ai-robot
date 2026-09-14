@@ -12,6 +12,7 @@ struct EyeView {
   lv_obj_t *glint;
   lv_obj_t *top_lid;
   lv_obj_t *bottom_lid;
+  lv_obj_t *marquee;
 };
 
 EyeView left_eye{};
@@ -25,6 +26,7 @@ uint32_t notice_until_frame = 0;
 EyeEmotion current_emotion = EyeEmotion::Neutral;
 uint32_t forced_blink_until_frame = 0;
 uint8_t forced_blink_amount = 0;
+uint32_t marquee_until_frame = 0;
 
 lv_obj_t *circle(lv_obj_t *parent, int16_t size, lv_color_t color) {
   lv_obj_t *obj = lv_obj_create(parent);
@@ -59,6 +61,17 @@ EyeView create_eye(lv_disp_t *display) {
   lv_obj_set_size(eye.bottom_lid, EXAMPLE_LCD_WIDTH, EXAMPLE_LCD_HEIGHT / 2);
   lv_obj_set_style_bg_color(eye.bottom_lid, lv_color_hex(0x241A17), 0);
   lv_obj_set_style_bg_opa(eye.bottom_lid, LV_OPA_COVER, 0);
+
+  eye.marquee = lv_label_create(screen);
+  lv_obj_set_width(eye.marquee, EXAMPLE_LCD_WIDTH - 28);
+  lv_label_set_long_mode(eye.marquee, LV_LABEL_LONG_SCROLL_CIRCULAR);
+  lv_label_set_text(eye.marquee, "");
+  lv_obj_set_style_text_color(eye.marquee, lv_color_white(), 0);
+  lv_obj_set_style_bg_color(eye.marquee, lv_color_hex(0x241A17), 0);
+  lv_obj_set_style_bg_opa(eye.marquee, LV_OPA_90, 0);
+  lv_obj_set_style_pad_all(eye.marquee, 8, 0);
+  lv_obj_align(eye.marquee, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_add_flag(eye.marquee, LV_OBJ_FLAG_HIDDEN);
   return eye;
 }
 
@@ -102,6 +115,16 @@ void animation_timer_cb(lv_timer_t *) {
   if (current_emotion == EyeEmotion::Skeptical) blink = max(blink, static_cast<uint8_t>(25));
   position_eye(left_eye, gaze_x, gaze_y, blink);
   position_eye(right_eye, gaze_x, gaze_y, blink);
+  const bool showMarquee = frame_count < marquee_until_frame;
+  lv_obj_t *labels[] = {left_eye.marquee, right_eye.marquee};
+  for (lv_obj_t *label : labels) {
+    if (showMarquee) {
+      lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_move_foreground(label);
+    } else {
+      lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
 }
 }  // namespace
 
@@ -123,6 +146,15 @@ void Eye_Notice(void) {
   notice_until_frame = frame_count + 50;
   gaze_x = 0;
   gaze_y = 0;
+}
+
+void Eye_ShowMarquee(const char *text, uint32_t durationMs) {
+  if (!text || !left_eye.marquee || !right_eye.marquee) return;
+  lv_label_set_text(left_eye.marquee, text);
+  lv_label_set_text(right_eye.marquee, text);
+  lv_obj_align(left_eye.marquee, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_align(right_eye.marquee, LV_ALIGN_CENTER, 0, 0);
+  marquee_until_frame = frame_count + max(static_cast<uint32_t>(1), durationMs / FRAME_MS);
 }
 
 void Eye_SetEmotion(EyeEmotion emotion) {

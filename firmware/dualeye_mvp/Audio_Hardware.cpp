@@ -210,6 +210,7 @@ void Audio_Hardware_Update() {
 }
 
 RobotAudioStatus Audio_Hardware_Status() { return status; }
+I2SClass *Audio_Hardware_I2S() { return status.initialized ? &audioI2s : nullptr; }
 
 #else
 
@@ -225,5 +226,6 @@ size_t Audio_Hardware_WritePcm(const int16_t *, size_t) { return 0; }
 void Audio_Hardware_SetSpeakerEnabled(bool) {}
 void Audio_Hardware_PlayTestTone(uint16_t, uint16_t) {}
 bool Audio_Hardware_PlayWav(const uint8_t *, size_t) { return false; }
+I2SClass *Audio_Hardware_I2S() { return nullptr; }
 
 #endif

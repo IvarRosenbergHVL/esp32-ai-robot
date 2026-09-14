@@ -90,6 +90,18 @@ features are independently enabled in `Robot_Config.h`. Copy
 networking. Networking requires ArduinoJson; proximity requires the Pololu
 VL53L1X Arduino library.
 
+## WakeNet bring-up
+
+WakeNet is enabled with `ROBOT_ENABLE_WAKE_WORD`. With Espressif Arduino core
+3.3.7, select **ESP SR 16M (3MB APP/7MB SPIFFS/2.9MB MODEL)** under Partition
+Scheme before compiling. Arduino then includes the bundled ESP-SR library and
+flashes `srmodels.bin` together with the application.
+
+The MVP wake phrase is **Hi ESP**. WakeNet consumes the two ES7210 microphone
+channels continuously while the robot is idle. On detection it pauses WakeNet,
+shows the surprised eye expression and scrolling wake-confirmation text, and
+starts the existing recorder. The BOOT button remains available as a fallback.
+
 The 16 kHz, 16-bit mono PCM `marseillaise.wav` is bundled into the firmware, so
 no microSD card is needed. It plays once at boot when `ROBOT_AUDIO_BOOT_WAV` is
 enabled. The proximity cue reuses it once per approach, observes a 75-second

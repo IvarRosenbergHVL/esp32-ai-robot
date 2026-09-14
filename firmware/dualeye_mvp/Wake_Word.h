@@ -3,3 +3,5 @@
 // WakeNet/ESP-SR integration boundary. BOOT simulates detection during bring-up.
 bool Wake_Word_Init();
 bool Wake_Word_Detected();
+bool Wake_Word_Pause();
+bool Wake_Word_Resume();
