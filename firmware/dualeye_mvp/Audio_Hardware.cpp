@@ -39,11 +39,11 @@ bool initializeMicrophoneCodec() {
     .i2s_format = ES7210_I2S_FMT_I2S,
     .bit_width = ES7210_I2S_BITS_16B,
     .mic_bias = ES7210_MIC_BIAS_2V87,
-    .mic_gain = ES7210_MIC_GAIN_30DB
+    .mic_gain = ES7210_MIC_GAIN_37_5DB
   };
   codecConfig.flags.tdm_enable = true;
   return es7210_config_codec(microphoneCodec, &codecConfig) == ESP_OK &&
-         es7210_config_volume(microphoneCodec, 10) == ESP_OK;
+         es7210_config_volume(microphoneCodec, ROBOT_AUDIO_MIC_DIGITAL_GAIN_DB) == ESP_OK;
 }
 
 bool initializeSpeakerCodec() {
@@ -83,7 +83,8 @@ bool Audio_Hardware_Init() {
   }
 
   status.initialized = true;
-  Serial.printf("[audio] Ready: %d Hz, 16-bit stereo, ES7210 + ES8311\n", ROBOT_AUDIO_SAMPLE_RATE);
+  Serial.printf("[audio] Ready: %d Hz, 16-bit stereo, ES7210 + ES8311, mic PGA=37.5 dB digital=%d dB\n",
+                ROBOT_AUDIO_SAMPLE_RATE, ROBOT_AUDIO_MIC_DIGITAL_GAIN_DB);
 #if ROBOT_AUDIO_STARTUP_TONE
   Audio_Hardware_PlayTestTone();
 #endif
