@@ -3,9 +3,9 @@
 #include "Audio_Recorder.h"
 #include "Backend_Client.h"
 #include "LVGL_Example.h"
+#include "Marseillaise_Audio.h"
 #include "Proximity_Sensor.h"
 #include "Robot_Config.h"
-#include "SD_MMC.h"
 #include "Wake_Word.h"
 
 namespace {
@@ -16,20 +16,8 @@ bool playedCueThisApproach = false;
 uint32_t lastCueAt = 0;
 uint32_t stateEnteredAt = 0;
 
-bool playLocalProximityCue() {
-  File file = SD_MMC.open("/marseillaise.wav", FILE_READ);
-  if (!file || file.isDirectory() || file.size() < 44) {
-    if (file) file.close();
-    return false;
-  }
-  const size_t bytes = file.size();
-  uint8_t *wav = static_cast<uint8_t *>(ps_malloc(bytes));
-  if (!wav) { file.close(); return false; }
-  const bool read = file.read(wav, bytes) == bytes;
-  file.close();
-  const bool played = read && Audio_Hardware_PlayWav(wav, bytes);
-  free(wav);
-  return played;
+bool playMarseillaise() {
+  return Audio_Hardware_PlayWav(MARSEILLAISE_WAV, MARSEILLAISE_WAV_BYTES);
 }
 
 void enter(RobotState next) {
@@ -88,6 +76,13 @@ void Robot_Controller_Init() {
   Wake_Word_Init();
   if (ROBOT_ENABLE_NETWORK) Backend_ConnectWifi();
   enter(RobotState::Idle);
+#if ROBOT_AUDIO_BOOT_WAV
+  Eye_Notice();
+  if (playMarseillaise())
+    Serial.println("[robot] Startup audio complete");
+  else
+    Serial.println("[robot] Startup audio skipped: check onboard audio initialization");
+#endif
 }
 
 void Robot_Controller_Update() {
@@ -111,7 +106,7 @@ void Robot_Controller_Update() {
       lastCueAt = millis();
       playedCueThisApproach = true;
       Eye_Notice();
-      if (!playLocalProximityCue()) Serial.println("[robot] Put a 16 kHz/16-bit mono PCM /marseillaise.wav on SD for the proximity cue");
+      if (!playMarseillaise()) Serial.println("[robot] Bundled proximity audio playback failed");
     }
   }
 

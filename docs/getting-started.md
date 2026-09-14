@@ -89,9 +89,11 @@ features are independently enabled in `Robot_Config.h`. Copy
 networking. Networking requires ArduinoJson; proximity requires the Pololu
 VL53L1X Arduino library.
 
-Place `/marseillaise.wav` on the SD card for the local very-close proximity cue.
-It must be 16 kHz, 16-bit mono PCM WAV. It plays once per approach, observes a 75-second
-cooldown, and rearms only after the person leaves the reset distance.
+The 16 kHz, 16-bit mono PCM `marseillaise.wav` is bundled into the firmware, so
+no microSD card is needed. It plays once at boot when `ROBOT_AUDIO_BOOT_WAV` is
+enabled. The proximity cue reuses it once per approach, observes a 75-second
+cooldown, and rearms only after the person leaves the reset distance. The source
+asset remains in `assets/audio/marseillaise.wav`.
 
 Recording uses PSRAM, converts stereo microphone input to mono WAV, and stops
 after sustained silence or ten seconds. Azure TTS returns the same PCM format
