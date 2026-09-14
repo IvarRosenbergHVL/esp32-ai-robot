@@ -5,10 +5,32 @@
 
 #if ROBOT_ENABLE_WAKE_WORD
 #include "ESP_SR.h"
+#include "esp_partition.h"
 
 namespace {
 volatile bool wakeDetected = false;
 bool wakeInitialized = false;
+
+bool modelPartitionReady() {
+  const esp_partition_t *partition = esp_partition_find_first(
+    ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, "model");
+  if (!partition) {
+    Serial.println("[wake] Missing model partition; select the ESP SR 16M partition scheme");
+    return false;
+  }
+  uint8_t header[16]{};
+  if (esp_partition_read(partition, 0, header, sizeof(header)) != ESP_OK) {
+    Serial.println("[wake] Cannot read model partition");
+    return false;
+  }
+  bool erased = true;
+  for (uint8_t value : header) erased = erased && value == 0xff;
+  if (erased) {
+    Serial.println("[wake] Model partition is empty; upload firmware again to flash srmodels.bin");
+    return false;
+  }
+  return true;
+}
 
 void onWakeEvent(sr_event_t event, int commandId, int phraseId) {
   (void)commandId;
@@ -23,6 +45,7 @@ void onWakeEvent(sr_event_t event, int commandId, int phraseId) {
 
 bool Wake_Word_Init() {
 #if ROBOT_ENABLE_WAKE_WORD
+  if (!modelPartitionReady()) return false;
   I2SClass *i2s = Audio_Hardware_I2S();
   if (!i2s) {
     Serial.println("[wake] Cannot start: onboard audio is not initialized");
