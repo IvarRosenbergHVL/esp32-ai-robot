@@ -19,6 +19,10 @@
 #define ROBOT_AUDIO_MIC_DIGITAL_GAIN_DB 18
 #define ROBOT_AUDIO_LEVEL_REPORT_MS 500
 
+// With networking disabled, play each captured utterance back locally. This
+// verifies the exact PCM stream that WakeNet and the backend recorder receive.
+#define ROBOT_AUDIO_OFFLINE_LOOPBACK 1
+
 #define ROBOT_RECORD_MAX_MS 10000
 #define ROBOT_RECORD_MIN_MS 900
 #define ROBOT_RECORD_SILENCE_MS 1100

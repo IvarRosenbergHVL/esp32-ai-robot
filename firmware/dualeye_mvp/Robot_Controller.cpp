@@ -64,6 +64,18 @@ void finishRecording() {
     enter(RobotState::Error);
     return;
   }
+#if ROBOT_AUDIO_OFFLINE_LOOPBACK
+  if (!ROBOT_ENABLE_NETWORK) {
+    Serial.printf("[robot] Loopback: playing %u-byte recording\n", static_cast<unsigned>(recording.bytes));
+    enter(RobotState::Speaking);
+    const bool played = Audio_Hardware_PlayWav(recording.wav, recording.bytes);
+    free(recording.wav);
+    Serial.println(played ? "[robot] Loopback complete" : "[robot] Loopback playback failed");
+    Wake_Word_Resume();
+    enter(personPresent ? RobotState::WakeListening : RobotState::Idle);
+    return;
+  }
+#endif
   enter(RobotState::Thinking);
   RobotBackendResponse response{};
   const bool ok = Backend_SendConversation(recording.wav, recording.bytes, response);
