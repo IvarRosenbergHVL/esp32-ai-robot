@@ -2,6 +2,25 @@ import type { Config } from "../config.js";
 import type { SttProvider } from "../domain.js";
 import { createHttpClient, describeHttpError } from "../http.js";
 
+interface RecognitionResult {
+  RecognitionStatus?: string;
+  DisplayText?: string;
+  NBest?: Array<{ Display?: string }>;
+}
+
+export function extractTranscript(payload: RecognitionResult | RecognitionResult[]): string {
+  const results = Array.isArray(payload) ? payload : [payload];
+  const successful = results.filter(result => result.RecognitionStatus === "Success");
+  const transcript = successful
+    .map(result => result.DisplayText ?? result.NBest?.[0]?.Display ?? "")
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  if (transcript) return transcript;
+  const status = results.map(result => result.RecognitionStatus).filter(Boolean).join(", ") || "unknown";
+  throw new Error(`Speech was not recognized: ${status}`);
+}
+
 export class AzureSttProvider implements SttProvider {
   private readonly http;
 
@@ -12,7 +31,7 @@ export class AzureSttProvider implements SttProvider {
   async transcribe(audio: Buffer, contentType: string): Promise<string> {
     const query = new URLSearchParams({ language: this.config.AZURE_SPEECH_LANGUAGE, format: "detailed" });
     const url = `https://${this.config.AZURE_SPEECH_REGION}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?${query}`;
-    let result: { RecognitionStatus?: string; DisplayText?: string; NBest?: Array<{ Display?: string }> };
+    let result: RecognitionResult | RecognitionResult[];
     try {
       const response = await this.http.post(url, audio, {
         headers: {
@@ -25,9 +44,6 @@ export class AzureSttProvider implements SttProvider {
     } catch (error) {
       throw describeHttpError(error, "Azure Speech STT");
     }
-    if (result.RecognitionStatus !== "Success") throw new Error(`Speech was not recognized: ${result.RecognitionStatus ?? "unknown"}`);
-    const text = result.DisplayText ?? result.NBest?.[0]?.Display;
-    if (!text) throw new Error("Azure Speech STT returned an empty transcript");
-    return text;
+    return extractTranscript(result);
   }
 }
