@@ -98,7 +98,18 @@ size_t Audio_Hardware_ReadPcm(int16_t *samples, size_t sampleCount, uint32_t tim
 
 size_t Audio_Hardware_WritePcm(const int16_t *samples, size_t sampleCount) {
   if (!status.initialized || !samples || sampleCount == 0) return 0;
-  return audioI2s.write(reinterpret_cast<const uint8_t *>(samples), sampleCount * sizeof(int16_t));
+  const uint8_t *data = reinterpret_cast<const uint8_t *>(samples);
+  const size_t bytes = sampleCount * sizeof(int16_t);
+  size_t written = 0;
+  while (written < bytes) {
+    const size_t count = audioI2s.write(data + written, bytes - written);
+    if (!count) {
+      vTaskDelay(pdMS_TO_TICKS(1));
+      continue;
+    }
+    written += count;
+  }
+  return written;
 }
 
 void Audio_Hardware_SetSpeakerEnabled(bool enabled) {
@@ -120,7 +131,7 @@ void Audio_Hardware_PlayTestTone(uint16_t frequencyHz, uint16_t durationMs) {
       const float phase = 2.0f * PI * frequencyHz * (first + frame) / ROBOT_AUDIO_SAMPLE_RATE;
       const int16_t value = static_cast<int16_t>(sinf(phase) * amplitude);
       stereo[frame * 2] = value;
-      stereo[frame * 2 + 1] = value;
+      stereo[frame * 2 + 1] = 0;
     }
     Audio_Hardware_WritePcm(stereo, frames * 2);
   }
@@ -162,7 +173,10 @@ bool Audio_Hardware_PlayWav(const uint8_t *wav, size_t bytes) {
   } else {
     for (size_t first = 0; first < inputSamples; first += 160) {
       const size_t count = min(static_cast<size_t>(160), inputSamples - first);
-      for (size_t index = 0; index < count; ++index) stereo[index * 2] = stereo[index * 2 + 1] = input[first + index];
+      for (size_t index = 0; index < count; ++index) {
+        stereo[index * 2] = input[first + index];
+        stereo[index * 2 + 1] = 0;
+      }
       Audio_Hardware_WritePcm(stereo, count * 2);
     }
   }
