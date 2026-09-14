@@ -2,6 +2,7 @@
 #include "Audio_Hardware.h"
 #include "Robot_Config.h"
 #include <Arduino.h>
+#include <math.h>
 
 #if ROBOT_ENABLE_WAKE_WORD
 #include "ESP_SR.h"
@@ -10,6 +11,37 @@
 namespace {
 volatile bool wakeDetected = false;
 bool wakeInitialized = false;
+
+const char *detectInputFormat() {
+  double leftSquares = 0.0;
+  double rightSquares = 0.0;
+  size_t frames = 0;
+  uint16_t leftPeak = 0;
+  uint16_t rightPeak = 0;
+  int16_t samples[320];
+  for (uint8_t chunk = 0; chunk < 100; ++chunk) {
+    const size_t count = Audio_Hardware_ReadPcm(samples, 320, 30) / sizeof(int16_t);
+    for (size_t index = 0; index + 1 < count; index += 2) {
+      const int32_t left = samples[index];
+      const int32_t right = samples[index + 1];
+      const uint16_t leftAbsolute = static_cast<uint16_t>(left < 0 ? -left : left);
+      const uint16_t rightAbsolute = static_cast<uint16_t>(right < 0 ? -right : right);
+      leftPeak = max(leftPeak, leftAbsolute);
+      rightPeak = max(rightPeak, rightAbsolute);
+      leftSquares += static_cast<double>(left) * left;
+      rightSquares += static_cast<double>(right) * right;
+      ++frames;
+    }
+  }
+  const float leftRms = frames ? sqrt(leftSquares / frames) / 32768.0f : 0.0f;
+  const float rightRms = frames ? sqrt(rightSquares / frames) / 32768.0f : 0.0f;
+  const char *format = "MM";
+  if (leftRms > rightRms * 8.0f) format = "MN";
+  else if (rightRms > leftRms * 8.0f) format = "NM";
+  Serial.printf("[wake] channel test: left rms=%.4f peak=%u, right rms=%.4f peak=%u, format=%s\n",
+                leftRms, leftPeak, rightRms, rightPeak, format);
+  return format;
+}
 
 bool modelPartitionReady() {
   const esp_partition_t *partition = esp_partition_find_first(
@@ -52,7 +84,8 @@ bool Wake_Word_Init() {
     return false;
   }
   ESP_SR.onEvent(onWakeEvent);
-  wakeInitialized = ESP_SR.begin(*i2s, nullptr, 0, SR_CHANNELS_STEREO, SR_MODE_WAKEWORD, "MM");
+  const char *inputFormat = detectInputFormat();
+  wakeInitialized = ESP_SR.begin(*i2s, nullptr, 0, SR_CHANNELS_STEREO, SR_MODE_WAKEWORD, inputFormat);
   Serial.println(wakeInitialized ? "[wake] WakeNet ready; say Hi ESP" : "[wake] WakeNet initialization failed");
   return wakeInitialized;
 #else
