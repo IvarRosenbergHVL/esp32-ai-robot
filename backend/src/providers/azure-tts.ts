@@ -8,6 +8,11 @@ function escapeXml(text: string): string {
   })[character]!);
 }
 
+function relativePercent(multiplier: number): string {
+  const percent = Math.round((multiplier - 1) * 100);
+  return `${percent >= 0 ? "+" : ""}${percent}%`;
+}
+
 export class AzureTtsProvider implements TtsProvider {
   private readonly http;
 
@@ -16,7 +21,10 @@ export class AzureTtsProvider implements TtsProvider {
   }
 
   async synthesize(text: string): Promise<TtsResult> {
-    const ssml = `<speak version="1.0" xml:lang="${this.config.AZURE_SPEECH_LANGUAGE}"><voice name="${this.config.AZURE_SPEECH_VOICE}">${escapeXml(text)}</voice></speak>`;
+    const pitch = relativePercent(this.config.AZURE_SPEECH_PITCH);
+    const rate = relativePercent(this.config.AZURE_SPEECH_RATE);
+    const volume = relativePercent(this.config.AZURE_SPEECH_VOLUME);
+    const ssml = `<speak version="1.0" xml:lang="${this.config.AZURE_SPEECH_LANGUAGE}"><voice name="${this.config.AZURE_SPEECH_VOICE}"><prosody pitch="${pitch}" rate="${rate}" volume="${volume}">${escapeXml(text)}</prosody></voice></speak>`;
     const url = `https://${this.config.AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`;
     try {
       const response = await this.http.post<ArrayBuffer>(url, ssml, {
