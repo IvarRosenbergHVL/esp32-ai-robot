@@ -8,7 +8,7 @@
 - Espressif Arduino core **3.2.0**
 - LVGL **8.3.10**
 - Waveshare's bundled `OneButton` library
-- Waveshare's bundled `es7210` and `es8311` libraries (needed when onboard audio is enabled)
+- Bundled `es7210` and `es8311` codec sources (included in the firmware sketch)
 
 These versions match Waveshare's official example and should remain pinned until
 the first physical-board test is complete.
@@ -63,9 +63,10 @@ Record mirrored or rotated behavior before changing pinout or rotation flags.
 Audio is disabled by default so display problems remain isolated. After the
 first display test succeeds:
 
-1. Install/copy Waveshare's bundled `es7210` and `es8311` libraries into the
-   Arduino libraries directory.
-2. Set `ROBOT_ENABLE_ONBOARD_AUDIO` to `1` in `Robot_Config.h`.
+1. The Apache-2.0-licensed `es7210` and `es8311` sources are included directly
+   in the firmware sketch, so no separate Arduino library installation is required.
+2. Set `ROBOT_ENABLE_ONBOARD_AUDIO` to `1` in `Robot_Config.h` (enabled in the
+   current hardware bring-up configuration).
 3. Compile and inspect Serial Monitor. A successful initialization reports
    `ES7210 + ES8311` followed by RMS/peak input levels every 500 ms.
 4. Speak near the onboard microphones and verify that RMS/peak values change.

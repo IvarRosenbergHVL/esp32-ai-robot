@@ -2,7 +2,7 @@
 
 // Keep hardware subsystems independently switchable during first-board bring-up.
 // Audio requires Waveshare's bundled es7210 and es8311 Arduino libraries.
-#define ROBOT_ENABLE_ONBOARD_AUDIO 0
+#define ROBOT_ENABLE_ONBOARD_AUDIO 1
 #define ROBOT_ENABLE_NETWORK 0
 #define ROBOT_ENABLE_PROXIMITY 0
 #define ROBOT_ENABLE_WAKE_WORD 0
