@@ -37,6 +37,10 @@ firmware integration simple; a streaming or binary endpoint can replace it later
 
 `GET /health` returns `{ "status": "ok" }`.
 
+The MVP voice is `en-US-AndrewMultilingualNeural` with configurable SSML
+prosody. The default multipliers are pitch `1.83`, rate `1.14`, and volume
+`1.30`, rendered as `+83%`, `+14%`, and `+30%` respectively.
+
 If `ROBOT_API_KEY` is set, send it as a bearer token. Azure credentials must never
 be stored in firmware.
 
